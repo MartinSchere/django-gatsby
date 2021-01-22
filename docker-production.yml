@@ -1,0 +1,37 @@
+# ONLY DEPLOYS DB AND API
+
+version: '3.7'
+services:
+  db:
+    # networks:
+    #   - djangonetwork
+    image: postgres:13.1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+    - "5432:5432"
+  api:
+    build:
+      context: ./backend
+    env_file: production.env
+    depends_on: 
+      - db
+    # links:
+    #   - db:db
+    # networks:
+    #   - djangonetwork
+  proxy:
+    build:
+      ./nginx
+    ports:
+      - 80:80
+    volumes: 
+      - ./nginx:/etc/nginx/conf.d
+    volumes_from:
+      - api
+
+# networks:
+#   djangonetwork:
+#     driver: bridge
+volumes:
+  postgres_data:
